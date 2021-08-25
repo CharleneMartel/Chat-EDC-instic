@@ -4,7 +4,7 @@ require('functions.php');
 
 $bdd = bdd_connect();
 delete_msg();
-$req = $bdd->prepare('INSERT INTO chat_messagesA (pseudo, message_text, timestamp) VALUES(:pseudo, :message_text, :timestamp)');
+$req = $bdd->prepare('INSERT INTO chat_messages (pseudo, message_text, timestamp) VALUES(:pseudo, :message_text, :timestamp)');
 $req->execute(array(
   'pseudo' => $_SESSION['pseudo'],
   'message_text' => $_GET['message'],
