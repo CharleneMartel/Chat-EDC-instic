@@ -3,7 +3,7 @@ header("Content-Type: text/plain");
 require('functions.php');
 $bdd = bdd_connect();
 if($_GET['action'] == 'new') {
-$reponse = $bdd->query('SELECT pseudo, message_text FROM chat_messagesA ORDER BY message_id DESC LIMIT 0, 50');
+$reponse = $bdd->query('SELECT pseudo, message_text FROM chat_messages ORDER BY message_id DESC LIMIT 0, 50');
 
 
 while ($donnees = $reponse->fetch())
@@ -18,7 +18,7 @@ while ($donnees = $reponse->fetch())
 $reponse->closeCursor();
 }
 if ($_GET['action'] == 'anc') {
-  $reponse_2 = $bdd->query('SELECT pseudo, message FROM ancien_messageA ORDER BY id DESC ');
+  $reponse_2 = $bdd->query('SELECT pseudo, message FROM ancien_message ORDER BY id DESC ');
 
 
 while ($donnees_2 = $reponse_2->fetch())
