@@ -39,7 +39,7 @@ function inscription() {
       $bdd = bdd_connect();
    
  
-    $query = $bdd->prepare("SELECT * FROM chat_accountsA WHERE account_login = :login");
+    $query = $bdd->prepare("SELECT * FROM chat_accounts WHERE account_login = :login");
     $query->execute(array(
         'login' => htmlspecialchars($_POST['pseudo'])
           ));
@@ -47,7 +47,7 @@ function inscription() {
             if($count == 0)
               {
                 $insert = $bdd->prepare('
-                  INSERT INTO chat_accountsA (account_login, account_pass, mail, prenom, nom)
+                  INSERT INTO chat_accounts (account_login, account_pass, mail, prenom, nom)
                   VALUES(:account_login, :account_pass, :mail, :prenom, :nom)
                   ');
                   $insert->execute(array(
@@ -96,11 +96,12 @@ function delete_msg() {
       ));
    
       }
-function user_connect($ip, $pseudo) {
-  
-  $bdd = bdd_connect();
+function user_connect() {
+  $pseudo = htmlspecialchars($_POST['pseudo']);
+  $ip = $_SERVER["REMOTE_ADDR"];
+  $bdd = bdd_connect($ip, $pseudo);
     $query = $bdd->prepare("
-        INSERT INTO chat_onlineA (online_ip, online_user, online_time)
+        INSERT INTO chat_online (online_ip, online_user, online_time)
         VALUES(:online_ip, :online_user, :online_time)
         ");
         $query->execute(array(
@@ -114,7 +115,7 @@ function user_connect($ip, $pseudo) {
       
       $ip = $_SERVER["REMOTE_ADDR"];
       $query = $bdd->prepare('
-      SELECT * FROM chat_onlineA WHERE online_user = :pseudo 
+      SELECT * FROM chat_online WHERE online_user = :pseudo 
       ');
       $query->execute(array(
       'pseudo' => $pseudo,
@@ -129,14 +130,14 @@ function user_connect($ip, $pseudo) {
                 }
                 return $is_user_connect;
                 }
- function delete_user() {
+ function delete_user($ip_suppr) {
     $bdd = bdd_connect();
-    $time_out = time()-600;
+    $time_out = time()-60;
       $query = $bdd->prepare('
-      DELETE FROM chat_onlineA WHERE online_time < :ip 
+      DELETE FROM chat_online WHERE online_ip = :ip 
       '); 
       $query->execute(array(
-      'ip' => $time_out,
+      'ip' => $ip_suppr,
       ));
       }
  function maj_connect() {
@@ -145,7 +146,7 @@ function user_connect($ip, $pseudo) {
     $pseudo = $_SESSION['pseudo'];
     $time = time();
     $query = $bdd->prepare('
-    SELECT * FROM chat_onlineA WHERE online_user = :pseudo
+    SELECT * FROM chat_online WHERE online_user = :pseudo
     ');
     $query->execute(array(
     'pseudo' => $pseudo,
@@ -153,7 +154,7 @@ function user_connect($ip, $pseudo) {
     $count = $query->rowCount();
       if ($count == 0) {
           $maj = $bdd->prepare("
-            INSERT INTO chat_onlineA (online_ip, online_user, online_time)
+            INSERT INTO chat_online (online_ip, online_user, online_time)
         VALUES(:online_ip, :online_user, :online_time)
         ");
         $maj->execute(array(
@@ -168,7 +169,7 @@ function hello() {
   $heure = date("H");
   $bdd = bdd_connect();
   $query = $bdd->prepare("
-    SELECT prenom, nom FROM chat_accountsA WHERE account_login = :pseudo
+    SELECT prenom, nom FROM chat_accounts WHERE account_login = :pseudo
     ");
     $query->execute(array(
     'pseudo' => $_SESSION['pseudo'],
@@ -190,7 +191,7 @@ function verif_mail() {
 $bdd = bdd_connect();
 $mail = htmlspecialchars($_POST['email']);
 $query = $bdd->prepare('
-  SELECT * FROM chat_accountsA WHERE mail = :mail
+  SELECT * FROM chat_accounts WHERE mail = :mail
   ');
   $query->execute(array(
   'mail' => $mail,
@@ -207,12 +208,6 @@ $count = $query->rowCount();
      return $verif_mail;
   }
 function deconnexion() {
-  $bdd = bdd_connect();
-  $query = $bdd->prepare('
-  DELETE FROM chat_onlineA WHERE online_user = :pseudo
-  ');
-  $query->execute(array('pseudo' => $_SESSION['pseudo']));
-  
   session_destroy();
   
   }
@@ -252,7 +247,7 @@ return $texte;
 
 function user_connecte() {
   $bdd = bdd_connect();
-  $reponse = $bdd->query('SELECT * FROM chat_onlineA');
+  $reponse = $bdd->query('SELECT * FROM chat_online');
   while ($donnees = $reponse->fetch()) {
       
       $user_status = $donnees['online_status'];
@@ -278,7 +273,7 @@ function user_connecte() {
 
     function get_message() {
       $bdd = bdd_connect();
-        $reponse = $bdd->query('SELECT pseudo, message_text FROM chat_messagesA ORDER BY message_id DESC LIMIT 0, 50');
+        $reponse = $bdd->query('SELECT pseudo, message_text FROM chat_messages ORDER BY message_id DESC LIMIT 0, 50');
 
 
 while ($donnees = $reponse->fetch())
